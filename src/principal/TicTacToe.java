@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,15 +35,13 @@ public class TicTacToe extends Application
    private final DadosJogadores dadosJogadores = new DadosJogadores();
    private final Label tituloCenaPrincipal = new Label("TicTacToe!");
    private Label hint = new Label();
-   private Label jogadorUm = new Label();
-   private Label jogadorDois = new Label();
+   private Label labelJogadorUm = new Label();
+   private Label labelJogadorDois = new Label();
 
    private Button[][] bts;
    public String simbolo = SIMBOLO_JOGADOR_UM;
    public int vezJogador = 0;
    public int numeroDeJogadas;
-   public int scoreJogadorDois = 0;
-   public int scoreJogadorUm = 0;
 
    @Override
    public void start(Stage primaryStage)
@@ -72,20 +69,22 @@ public class TicTacToe extends Application
       boxLabelPlacar.setAlignment(Pos.CENTER);
       boxLabelPlacar.getChildren().add(placar);
 
-      jogadorUm.setText("Jogador Um: " + scoreJogadorUm);
-      jogadorUm.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
+      labelJogadorUm.setText("Jogador Um: " + (dadosJogadores.getScoreJogadorUm() != null ?
+               dadosJogadores.getScoreJogadorUm().toString() : 0));
+      labelJogadorUm.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
 
       HBox boxPlacarUm = new HBox(5);
       boxPlacarUm.setAlignment(Pos.BASELINE_LEFT);
-      boxPlacarUm.getChildren().add(jogadorUm);
+      boxPlacarUm.getChildren().add(labelJogadorUm);
 
-
-      jogadorDois.setText("Jogador Dois: " + scoreJogadorDois);
-      jogadorDois.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
+      labelJogadorDois.setText("Jogador Dois: " + (dadosJogadores.getScoreJogadorDois() != null ?
+               dadosJogadores.getScoreJogadorDois().toString() :
+               0));
+      labelJogadorDois.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
 
       HBox boxPlacarDois = new HBox(5);
       boxPlacarDois.setAlignment(Pos.BASELINE_RIGHT);
-      boxPlacarDois.getChildren().add(jogadorDois);
+      boxPlacarDois.getChildren().add(labelJogadorDois);
 
       HBox boxPlacar = new HBox(90);
       boxPlacar.setAlignment(Pos.CENTER);
@@ -186,13 +185,13 @@ public class TicTacToe extends Application
 
       if (vezJogador == 0)
       {
-         tituloCenaPrincipal.setText("Turno do jogador(a): " + dadosJogadores.getNomeJogadorDois());
+         tituloCenaPrincipal.setText("Turno de: " + dadosJogadores.getNomeJogadorDois());
          simbolo = SIMBOLO_JOGADOR_UM;
          vezJogador = 1;
       }
       else
       {
-         tituloCenaPrincipal.setText("Turno do jogador(a): " + dadosJogadores.getNomeJogadorUm());
+         tituloCenaPrincipal.setText("Turno de: " + dadosJogadores.getNomeJogadorUm());
          simbolo = SIMBOLO_JOGADOR_DOIS;
          vezJogador = 0;
       }
@@ -247,13 +246,13 @@ public class TicTacToe extends Application
             String nomeGanhador = vezJogador == 0 ? dadosJogadores.getNomeJogadorDois() : dadosJogadores.getNomeJogadorUm();
             if (vezJogador == 0)
             {
-               scoreJogadorDois++;
-               jogadorDois.setText("Jogador Um: " + scoreJogadorDois);
+               dadosJogadores.incrementaScore(2);
+               labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
             }
             else
             {
-               scoreJogadorUm++;
-               jogadorUm.setText("Jogador Um: " + scoreJogadorUm);
+               dadosJogadores.incrementaScore(1);
+               labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
             }
 
             Label labelVencedor = new Label("O vencedor é: " + nomeGanhador);
@@ -304,9 +303,8 @@ public class TicTacToe extends Application
          }
       }
 
+      vezJogador = 0;
       numeroDeJogadas = 0;
-      scoreJogadorDois = 0;
-      scoreJogadorUm = 0;
    }
 
    private void criaJanelaNovoJogo(DadosJogadores dadosJogadores)
@@ -472,8 +470,8 @@ public class TicTacToe extends Application
 
       jogo.setMatrizJogo(matrizJogo);
       jogo.setVezJogador(vezJogador);
-      jogo.setScoreJogadorUm(scoreJogadorUm);
-      jogo.setScoreJogadorDois(scoreJogadorDois);
+      jogo.setScoreJogadorUm(dadosJogadores.getScoreJogadorUm());
+      jogo.setScoreJogadorDois(dadosJogadores.getScoreJogadorDois());
    }
 
    public void carregarJogo(File arquivo)
@@ -500,8 +498,10 @@ public class TicTacToe extends Application
             }
 
             vezJogador = jogoCarregado.getVezJogador();
-            scoreJogadorUm = jogoCarregado.getScoreJogadorUm();
-            scoreJogadorDois = jogoCarregado.getScoreJogadorDois();
+            dadosJogadores.setScoreJogadorUm(jogoCarregado.getScoreJogadorUm());
+            dadosJogadores.setScoreJogadorDois(jogoCarregado.getScoreJogadorDois());
+            dadosJogadores.setNomeJogadorUm(jogoCarregado.getNomeJogadorUm());
+            dadosJogadores.setNomeJogadorDois(jogoCarregado.getNomeJogadorDois());
 
          }
          catch (Exception ex)

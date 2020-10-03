@@ -11,6 +11,8 @@ public class GameState implements Serializable
    private int vezJogador;
    private int scoreJogadorDois;
    private int scoreJogadorUm;
+   private String nomeJogadorUm;
+   private String nomeJogadorDois;
 
    public String[][] getMatrizJogo()
    {
@@ -50,5 +52,25 @@ public class GameState implements Serializable
    public void setScoreJogadorUm(int scoreJogadorUm)
    {
       this.scoreJogadorUm = scoreJogadorUm;
+   }
+
+   public String getNomeJogadorUm()
+   {
+      return nomeJogadorUm;
+   }
+
+   public void setNomeJogadorUm(String nomeJogadorUm)
+   {
+      this.nomeJogadorUm = nomeJogadorUm;
+   }
+
+   public String getNomeJogadorDois()
+   {
+      return nomeJogadorDois;
+   }
+
+   public void setNomeJogadorDois(String nomeJogadorDois)
+   {
+      this.nomeJogadorDois = nomeJogadorDois;
    }
 }
