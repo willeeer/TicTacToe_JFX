@@ -1,8 +1,11 @@
 package principal;
 
-public class DadosJogadores
+import java.io.Serializable;
+
+public class DadosJogadores implements Serializable
 {
 
+   private static final long serialVersionUID = -7605007534633168025L;
    private String nomeJogadorUm;
    private String nomeJogadorDois;
    private Integer scoreJogadorDois = 0;
@@ -48,10 +51,14 @@ public class DadosJogadores
       this.scoreJogadorUm = scoreJogadorUm;
    }
 
-   public void incrementaScore(Integer numeroJogador){
-      if(numeroJogador.equals(1)){
+   public void incrementaScore(Integer numeroJogador)
+   {
+      if (numeroJogador.equals(1))
+      {
          scoreJogadorUm++;
-      }else{
+      }
+      else
+      {
          scoreJogadorDois++;
       }
    }

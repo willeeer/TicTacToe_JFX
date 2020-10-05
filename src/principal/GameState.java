@@ -9,10 +9,8 @@ public class GameState implements Serializable
 
    private String[][] matrizJogo;
    private int vezJogador;
-   private int scoreJogadorDois;
-   private int scoreJogadorUm;
-   private String nomeJogadorUm;
-   private String nomeJogadorDois;
+   private DadosJogadores dadosJogadores;
+   private int numeroDeJogadas;
 
    public String[][] getMatrizJogo()
    {
@@ -34,43 +32,23 @@ public class GameState implements Serializable
       this.vezJogador = vezJogador;
    }
 
-   public int getScoreJogadorDois()
+   public DadosJogadores getDadosJogadores()
    {
-      return scoreJogadorDois;
+      return dadosJogadores;
    }
 
-   public void setScoreJogadorDois(int scoreJogadorDois)
+   public void setDadosJogadores(DadosJogadores dadosJogadores)
    {
-      this.scoreJogadorDois = scoreJogadorDois;
+      this.dadosJogadores = dadosJogadores;
    }
 
-   public int getScoreJogadorUm()
+   public int getNumeroDeJogadas()
    {
-      return scoreJogadorUm;
+      return numeroDeJogadas;
    }
 
-   public void setScoreJogadorUm(int scoreJogadorUm)
+   public void setNumeroDeJogadas(int numeroDeJogadas)
    {
-      this.scoreJogadorUm = scoreJogadorUm;
-   }
-
-   public String getNomeJogadorUm()
-   {
-      return nomeJogadorUm;
-   }
-
-   public void setNomeJogadorUm(String nomeJogadorUm)
-   {
-      this.nomeJogadorUm = nomeJogadorUm;
-   }
-
-   public String getNomeJogadorDois()
-   {
-      return nomeJogadorDois;
-   }
-
-   public void setNomeJogadorDois(String nomeJogadorDois)
-   {
-      this.nomeJogadorDois = nomeJogadorDois;
+      this.numeroDeJogadas = numeroDeJogadas;
    }
 }

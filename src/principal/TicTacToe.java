@@ -19,10 +19,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
+import java.io.*;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,9 +29,9 @@ public class TicTacToe extends Application
 
    private final String SIMBOLO_JOGADOR_UM = "X";
    private final String SIMBOLO_JOGADOR_DOIS = "O";
-   private final String SOMBO_NAO_JOGADO = "#";
-   private final DadosJogadores dadosJogadores = new DadosJogadores();
+   private final String SIMBOLO_NAO_JOGADO = "#";
    private final Label tituloCenaPrincipal = new Label("TicTacToe!");
+   private DadosJogadores dadosJogadores = new DadosJogadores();
    private Label hint = new Label();
    private Label labelJogadorUm = new Label();
    private Label labelJogadorDois = new Label();
@@ -41,12 +39,11 @@ public class TicTacToe extends Application
    private Button[][] bts;
    public String simbolo = SIMBOLO_JOGADOR_UM;
    public int vezJogador = 0;
-   public int numeroDeJogadas;
+   public int numeroDeJogadas = 0;
 
    @Override
    public void start(Stage primaryStage)
    {
-      numeroDeJogadas = 0;
 
       tituloCenaPrincipal.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
 
@@ -92,31 +89,7 @@ public class TicTacToe extends Application
 
       inicializaBotoes(grid);
 
-      FileChooser fileChooser = new FileChooser();
-      Menu menuFile = new Menu("Iniciar");
-      MenuItem newGame = new MenuItem("Novo Jogo");
-      newGame.setOnAction(event -> criaJanelaNovoJogo(dadosJogadores));
-
-      MenuItem loadGame = new MenuItem("Carregar Jogo");
-      loadGame.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-      loadGame.setOnAction(event -> {
-         File file = fileChooser.showOpenDialog(primaryStage);
-      });
-
-      MenuItem saveGame = new MenuItem("Salvar Jogo");
-      saveGame.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
-      saveGame.setOnAction(event -> {
-         File file = fileChooser.showSaveDialog(primaryStage);
-
-      });
-
-      MenuItem exit = new MenuItem("Sair");
-      exit.setOnAction(event -> System.exit(0));
-
-      menuFile.getItems().addAll(newGame, loadGame, saveGame, exit);
-
-      MenuBar menuBar = new MenuBar();
-      menuBar.getMenus().addAll(menuFile);
+      MenuBar menuBar = criaMenuBar(primaryStage);
 
       hint.setLineSpacing(1);
       hint.setText("Clique em Iniciar para começar um novo jogo, \nou para carregar um jogo salvo.");
@@ -138,6 +111,37 @@ public class TicTacToe extends Application
       primaryStage.show();
    }
 
+   private MenuBar criaMenuBar(Stage primaryStage)
+   {
+      FileChooser fileChooser = new FileChooser();
+      Menu menuFile = new Menu("Iniciar");
+      MenuItem newGame = new MenuItem("Novo Jogo");
+      newGame.setOnAction(event -> criaJanelaNovoJogo(dadosJogadores));
+
+      MenuItem loadGame = new MenuItem("Carregar Jogo");
+      loadGame.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
+      loadGame.setOnAction(event -> {
+         File file = fileChooser.showOpenDialog(primaryStage);
+         carregarJogo(file);
+      });
+
+      MenuItem saveGame = new MenuItem("Salvar Jogo");
+      saveGame.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+      saveGame.setOnAction(event -> {
+         File file = fileChooser.showSaveDialog(primaryStage);
+         salvarJogo(file);
+      });
+
+      MenuItem exit = new MenuItem("Sair");
+      exit.setOnAction(event -> System.exit(0));
+
+      menuFile.getItems().addAll(newGame, loadGame, saveGame, exit);
+
+      MenuBar menuBar = new MenuBar();
+      menuBar.getMenus().addAll(menuFile);
+      return menuBar;
+   }
+
    private void inicializaBotoes(GridPane grid)
    {
 
@@ -146,7 +150,7 @@ public class TicTacToe extends Application
       {
          for (int j = 0; j < 3; j++)
          {
-            bts[i][j] = new Button(SOMBO_NAO_JOGADO);
+            bts[i][j] = new Button(SIMBOLO_NAO_JOGADO);
             bts[i][j].setFont(new Font("Calibri", 60));
             bts[i][j].setTextAlignment(TextAlignment.CENTER);
             bts[i][j].setDisable(true);
@@ -164,7 +168,6 @@ public class TicTacToe extends Application
       bts[2][0].setOnAction(event -> realizaJogada(2, 0));
       bts[2][1].setOnAction(event -> realizaJogada(2, 1));
       bts[2][2].setOnAction(event -> realizaJogada(2, 2));
-      numeroDeJogadas = 0;
 
       int n = 0;
       int k = 0;
@@ -277,6 +280,8 @@ public class TicTacToe extends Application
       botaoReset.setAlignment(Pos.CENTER);
       botaoReset.setOnAction(event -> {
          reiniciaTabuleiro();
+         sortearJogadorInicial();
+         numeroDeJogadas = 0;
          cenaFimJogo.getWindow().hide();
       });
 
@@ -290,6 +295,14 @@ public class TicTacToe extends Application
       stageNewGame.show();
    }
 
+   private void sortearJogadorInicial()
+   {
+
+      Random random = new Random();
+      vezJogador = random.nextInt(2);
+      preencherLabelTurno(vezJogador);
+   }
+
    private void reiniciaTabuleiro()
    {
 
@@ -297,14 +310,32 @@ public class TicTacToe extends Application
       {
          for (int j = 0; j < 3; j++)
          {
-            bts[i][j].setText(SOMBO_NAO_JOGADO);
+            bts[i][j].setText(SIMBOLO_NAO_JOGADO);
             bts[i][j].setFont(new Font("Calibri", 60));
             bts[i][j].setDisable(false);
          }
       }
+   }
 
-      vezJogador = 0;
-      numeroDeJogadas = 0;
+   private void preencherLabelTurno(int vezJogador)
+   {
+      if (vezJogador == 0)
+      {
+         tituloCenaPrincipal.setText("Turno do jogador(a): " + dadosJogadores.getNomeJogadorUm());
+      }
+      else
+      {
+         tituloCenaPrincipal.setText("Turno do jogador(a): " + dadosJogadores.getNomeJogadorDois());
+      }
+   }
+
+   private void zerarPlacar()
+   {
+      dadosJogadores.setScoreJogadorUm(0);
+      dadosJogadores.setScoreJogadorDois(0);
+      labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
+      labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
+
    }
 
    private void criaJanelaNovoJogo(DadosJogadores dadosJogadores)
@@ -334,7 +365,11 @@ public class TicTacToe extends Application
       button2.setOnAction(event -> {
          dadosJogadores.setNomeJogadorUm(textoJogadorUm.getText());
          dadosJogadores.setNomeJogadorDois(textoJogadorDois.getText());
-         tituloCenaPrincipal.setText("Turno do jogador(a): " + dadosJogadores.getNomeJogadorUm());
+         sortearJogadorInicial();
+         zerarPlacar();
+         numeroDeJogadas = 0;
+         reiniciaTabuleiro();
+
          cenaNovoJogo.getWindow().hide();
       });
 
@@ -346,10 +381,6 @@ public class TicTacToe extends Application
       Text scenetitle = new Text("Dados dos Jogadores");
       scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
       gridNewGame.add(scenetitle, 0, 0, 2, 1);
-
-      numeroDeJogadas = 0;
-
-      reiniciaTabuleiro();
 
       ((VBox) cenaNovoJogo.getRoot()).getChildren().addAll(gridNewGame);
 
@@ -455,7 +486,7 @@ public class TicTacToe extends Application
       return false;
    }
 
-   public void salvarJogo()
+   public void salvarJogo(File arquivo)
    {
       GameState jogo = new GameState();
       String[][] matrizJogo = new String[3][3];
@@ -470,8 +501,24 @@ public class TicTacToe extends Application
 
       jogo.setMatrizJogo(matrizJogo);
       jogo.setVezJogador(vezJogador);
-      jogo.setScoreJogadorUm(dadosJogadores.getScoreJogadorUm());
-      jogo.setScoreJogadorDois(dadosJogadores.getScoreJogadorDois());
+      jogo.setDadosJogadores(dadosJogadores);
+      jogo.setNumeroDeJogadas(numeroDeJogadas);
+
+      try
+      {
+         FileOutputStream fout = new FileOutputStream(arquivo);
+         ObjectOutputStream oos = new ObjectOutputStream(fout);
+         oos.writeObject(jogo);
+         System.out.println("Jogo salvo com sucesso.");
+      }
+      catch (FileNotFoundException ex)
+      {
+         Logger.getLogger(GameState.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      catch (IOException ex)
+      {
+         Logger.getLogger(GameState.class.getName()).log(Level.SEVERE, null, ex);
+      }
    }
 
    public void carregarJogo(File arquivo)
@@ -488,20 +535,28 @@ public class TicTacToe extends Application
             ois.close();
             fin.close();
 
+            String[][] matrizCarregada = jogoCarregado.getMatrizJogo();
+
             for (int i = 0; i < 3; i++)
             {
                for (int j = 0; j < 3; j++)
                {
-                  bts[i][j].setText(jogoCarregado.getMatrizJogo()[i][j]);
-                  bts[i][j].setDisable(bts[i][j].getText().compareTo(SOMBO_NAO_JOGADO) == 0);
+                  bts[i][j].setText(matrizCarregada[i][j]);
+                  bts[i][j].setDisable(false);
+                  if (bts[i][j].getText().compareTo(SIMBOLO_NAO_JOGADO) != 0)
+                  {
+                     bts[i][j].disarm();
+                     bts[i][j].fire();
+                  }
                }
             }
 
             vezJogador = jogoCarregado.getVezJogador();
-            dadosJogadores.setScoreJogadorUm(jogoCarregado.getScoreJogadorUm());
-            dadosJogadores.setScoreJogadorDois(jogoCarregado.getScoreJogadorDois());
-            dadosJogadores.setNomeJogadorUm(jogoCarregado.getNomeJogadorUm());
-            dadosJogadores.setNomeJogadorDois(jogoCarregado.getNomeJogadorDois());
+            dadosJogadores = jogoCarregado.getDadosJogadores();
+            numeroDeJogadas = jogoCarregado.getNumeroDeJogadas();
+            labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
+            labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
+            preencherLabelTurno(vezJogador);
 
          }
          catch (Exception ex)
