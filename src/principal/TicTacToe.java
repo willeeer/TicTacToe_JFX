@@ -4,7 +4,12 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
@@ -19,7 +24,12 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,19 +37,27 @@ import java.util.logging.Logger;
 public class TicTacToe extends Application
 {
 
-   private final String SIMBOLO_JOGADOR_UM = "X";
-   private final String SIMBOLO_JOGADOR_DOIS = "O";
-   private final String SIMBOLO_NAO_JOGADO = "#";
-   private final Label tituloCenaPrincipal = new Label("TicTacToe!");
+   private static final String JOGADOR_UM = "Jogador Um: ";
+   private static final String JOGADOR_DOIS = "Jogador Dois: ";
+   private static final String SIMBOLO_JOGADOR_UM = "X";
+   private static final String SIMBOLO_JOGADOR_DOIS = "O";
+   private static final String SIMBOLO_NAO_JOGADO = "#";
+   private static final Label tituloCenaPrincipal = new Label("TicTacToe!");
+   private final Label hint = new Label();
+   private final Label labelJogadorUm = new Label();
+   private final Label labelJogadorDois = new Label();
+   private int vezJogador = 0;
+   private int numeroDeJogadas = 0;
    private DadosJogadores dadosJogadores = new DadosJogadores();
-   private Label hint = new Label();
-   private Label labelJogadorUm = new Label();
-   private Label labelJogadorDois = new Label();
-
    private Button[][] bts;
-   public String simbolo = SIMBOLO_JOGADOR_UM;
-   public int vezJogador = 0;
-   public int numeroDeJogadas = 0;
+
+   /**
+    * @param args the command line arguments
+    */
+   public static void main(String[] args)
+   {
+      launch(args);
+   }
 
    @Override
    public void start(Stage primaryStage)
@@ -66,17 +84,17 @@ public class TicTacToe extends Application
       boxLabelPlacar.setAlignment(Pos.CENTER);
       boxLabelPlacar.getChildren().add(placar);
 
-      labelJogadorUm.setText("Jogador Um: " + (dadosJogadores.getScoreJogadorUm() != null ?
-               dadosJogadores.getScoreJogadorUm().toString() : 0));
+      labelJogadorUm.setText(JOGADOR_UM + (dadosJogadores.getScoreJogadorUm() != null ?
+         dadosJogadores.getScoreJogadorUm().toString() : 0));
       labelJogadorUm.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
 
       HBox boxPlacarUm = new HBox(5);
       boxPlacarUm.setAlignment(Pos.BASELINE_LEFT);
       boxPlacarUm.getChildren().add(labelJogadorUm);
 
-      labelJogadorDois.setText("Jogador Dois: " + (dadosJogadores.getScoreJogadorDois() != null ?
-               dadosJogadores.getScoreJogadorDois().toString() :
-               0));
+      labelJogadorDois.setText(JOGADOR_DOIS + (dadosJogadores.getScoreJogadorDois() != null ?
+         dadosJogadores.getScoreJogadorDois().toString() :
+         0));
       labelJogadorDois.setFont(Font.font("Tahoma", FontWeight.NORMAL, 15));
 
       HBox boxPlacarDois = new HBox(5);
@@ -189,17 +207,16 @@ public class TicTacToe extends Application
       if (vezJogador == 0)
       {
          tituloCenaPrincipal.setText("Turno de: " + dadosJogadores.getNomeJogadorDois());
-         simbolo = SIMBOLO_JOGADOR_UM;
+         bts[linha][coluna].setText(SIMBOLO_JOGADOR_UM);
          vezJogador = 1;
       }
       else
       {
          tituloCenaPrincipal.setText("Turno de: " + dadosJogadores.getNomeJogadorUm());
-         simbolo = SIMBOLO_JOGADOR_DOIS;
+         bts[linha][coluna].setText(SIMBOLO_JOGADOR_DOIS);
          vezJogador = 0;
       }
 
-      bts[linha][coluna].setText(simbolo);
       bts[linha][coluna].setDisable(true);
       numeroDeJogadas++;
 
@@ -250,12 +267,12 @@ public class TicTacToe extends Application
             if (vezJogador == 0)
             {
                dadosJogadores.incrementaScore(2);
-               labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
+               labelJogadorDois.setText(JOGADOR_DOIS + dadosJogadores.getScoreJogadorDois());
             }
             else
             {
                dadosJogadores.incrementaScore(1);
-               labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
+               labelJogadorUm.setText(JOGADOR_UM + dadosJogadores.getScoreJogadorUm());
             }
 
             Label labelVencedor = new Label("O vencedor é: " + nomeGanhador);
@@ -333,8 +350,8 @@ public class TicTacToe extends Application
    {
       dadosJogadores.setScoreJogadorUm(0);
       dadosJogadores.setScoreJogadorDois(0);
-      labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
-      labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
+      labelJogadorUm.setText(JOGADOR_UM + dadosJogadores.getScoreJogadorUm());
+      labelJogadorDois.setText(JOGADOR_DOIS + dadosJogadores.getScoreJogadorDois());
 
    }
 
@@ -348,23 +365,23 @@ public class TicTacToe extends Application
       gridNewGame.setVgap(10);
       gridNewGame.setPadding(new Insets(25, 25, 25, 25));
 
-      Label labelJogadorUm = new Label("Nome Jogador 1:");
-      gridNewGame.add(labelJogadorUm, 0, 1);
+      Label labelJogadorUmNovoJogo = new Label("Nome Jogador 1:");
+      gridNewGame.add(labelJogadorUmNovoJogo, 0, 1);
 
-      TextField textoJogadorUm = new TextField();
-      gridNewGame.add(textoJogadorUm, 1, 1);
+      TextField textFieldJogadorUm = new TextField();
+      gridNewGame.add(textFieldJogadorUm, 1, 1);
 
-      Label labelJogadorDois = new Label("Nome Jogador 2:");
-      gridNewGame.add(labelJogadorDois, 0, 2);
+      Label labelJogadorDoisNovoJogo = new Label("Nome Jogador 2:");
+      gridNewGame.add(labelJogadorDoisNovoJogo, 0, 2);
 
-      TextField textoJogadorDois = new TextField();
-      gridNewGame.add(textoJogadorDois, 1, 2);
+      TextField textFieldJogadorDois = new TextField();
+      gridNewGame.add(textFieldJogadorDois, 1, 2);
 
       Button button2 = new Button("Submeter");
       button2.setAlignment(Pos.CENTER);
       button2.setOnAction(event -> {
-         dadosJogadores.setNomeJogadorUm(textoJogadorUm.getText());
-         dadosJogadores.setNomeJogadorDois(textoJogadorDois.getText());
+         dadosJogadores.setNomeJogadorUm(textFieldJogadorUm.getText());
+         dadosJogadores.setNomeJogadorDois(textFieldJogadorDois.getText());
          sortearJogadorInicial();
          zerarPlacar();
          numeroDeJogadas = 0;
@@ -478,12 +495,7 @@ public class TicTacToe extends Application
          }
       }
 
-      if (jogador1 == 3 || jogador2 == 3)
-      {
-         return true;
-      }
-
-      return false;
+      return jogador1 == 3 || jogador2 == 3;
    }
 
    public void salvarJogo(File arquivo)
@@ -509,16 +521,15 @@ public class TicTacToe extends Application
          FileOutputStream fout = new FileOutputStream(arquivo);
          ObjectOutputStream oos = new ObjectOutputStream(fout);
          oos.writeObject(jogo);
+         oos.close();
+         fout.close();
          System.out.println("Jogo salvo com sucesso.");
       }
-      catch (FileNotFoundException ex)
+      catch (Exception ex)
       {
          Logger.getLogger(GameState.class.getName()).log(Level.SEVERE, null, ex);
       }
-      catch (IOException ex)
-      {
-         Logger.getLogger(GameState.class.getName()).log(Level.SEVERE, null, ex);
-      }
+
    }
 
    public void carregarJogo(File arquivo)
@@ -554,8 +565,8 @@ public class TicTacToe extends Application
             vezJogador = jogoCarregado.getVezJogador();
             dadosJogadores = jogoCarregado.getDadosJogadores();
             numeroDeJogadas = jogoCarregado.getNumeroDeJogadas();
-            labelJogadorUm.setText("Jogador Um: " + dadosJogadores.getScoreJogadorUm());
-            labelJogadorDois.setText("Jogador Dois: " + dadosJogadores.getScoreJogadorDois());
+            labelJogadorUm.setText(JOGADOR_UM + dadosJogadores.getScoreJogadorUm());
+            labelJogadorDois.setText(JOGADOR_DOIS + dadosJogadores.getScoreJogadorDois());
             preencherLabelTurno(vezJogador);
 
          }
@@ -565,14 +576,6 @@ public class TicTacToe extends Application
          }
       }
 
-   }
-
-   /**
-    * @param args the command line arguments
-    */
-   public static void main(String[] args)
-   {
-      launch(args);
    }
 
 }
